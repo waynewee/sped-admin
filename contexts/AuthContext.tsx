@@ -1,9 +1,6 @@
 import { createContext, ReactChildren, useEffect, useState } from "react";
 import { getUser } from "../services/user";
-
-interface IUser {
-  username: string;
-}
+import { IUser } from "../types";
 
 interface IAuthContext {
   isLoggedIn: boolean;
@@ -38,10 +35,12 @@ export const AuthContextProvider: any = ({
     (async () => {
       try {
         const user = await getUser();
-
-        setIsLoggedIn(true);
-        setUser(user);
         setIsAuthLoaded(true);
+
+        if (user !== null) {
+          setIsLoggedIn(true);
+          setUser(user);
+        }
       } catch (e) {
         console.log("Not Logged In");
       }

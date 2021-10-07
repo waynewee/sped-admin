@@ -1,15 +1,10 @@
 import axios from "axios";
-import { useContext } from "react";
 import { config } from "../../config";
-import { AuthContext } from "../../contexts/AuthContext";
-
+import { IUser } from "../../types";
 export const postLogin = async ({
   username,
   password,
-}: {
-  username: string;
-  password: string;
-}) => {
+}: IUser): Promise<IUser> => {
   const res = await axios({
     method: "POST",
     url: `${config.API_URL}/login`,

@@ -6,9 +6,14 @@ import { Button, Form, Input } from "antd";
 import { postLogin } from "../../../services/login";
 
 export const LoginForm: FunctionComponent = () => {
+  const { setUser, setIsLoggedIn } = useContext(AuthContext);
+
   const onFinish = async (values: any) => {
-    await postLogin(values);
-    Router.push("/");
+    try {
+      const user = await postLogin(values);
+      setIsLoggedIn(true);
+      setUser(user);
+    } catch (e) {}
   };
 
   const onFinishFailed = (errorInfo: any) => {

@@ -1,19 +1,16 @@
-import React, { FunctionComponent, ReactNode } from "react";
-import { Layout, PageHeader, Menu } from "antd";
+import React, { FunctionComponent, ReactNode, useContext } from "react";
+import { Layout, PageHeader, Menu, Breadcrumb } from "antd";
 import Router, { useRouter } from "next/router";
 
-import {
-  FaTachometerAlt,
-  FaUser,
-  FaSchool,
-  FaUserGraduate,
-  FaTools,
-  FaCog,
-  FaGamepad,
-} from "react-icons/fa";
+import { FaTachometerAlt, FaUser, FaSchool, FaPowerOff } from "react-icons/fa";
 interface IWrapper {
   children: ReactNode;
 }
+
+import { Row, Col } from "antd";
+import { AuthContext } from "../../contexts/AuthContext";
+import { getLogout } from "../../services/logout";
+import { getBreadCrumbsFromPath } from "../../utils";
 
 const { Header, Sider, Content } = Layout;
 const { SubMenu } = Menu;
@@ -21,7 +18,18 @@ const { SubMenu } = Menu;
 export const Wrapper: FunctionComponent<IWrapper> = ({ children }) => {
   const router = useRouter();
 
+  const { user, setUser, setIsLoggedIn } = useContext(AuthContext);
+
   const selectedKey = router.pathname.toString().slice(1).split("/").join("-");
+
+  const handleLogout = async () => {
+    await getLogout();
+    setUser({});
+    setIsLoggedIn(false);
+    window.open("/login", "_self");
+  };
+
+  const breadCrumbs = getBreadCrumbsFromPath(router.asPath);
 
   return (
     <>
@@ -54,13 +62,6 @@ export const Wrapper: FunctionComponent<IWrapper> = ({ children }) => {
               Dashboard
             </Menu.Item>
             <Menu.Item
-              onClick={() => Router.push("/profile")}
-              key="profile"
-              icon={<FaUser />}
-            >
-              Profile
-            </Menu.Item>
-            <Menu.Item
               onClick={() => Router.push("/classes")}
               key="classes"
               icon={<FaSchool />}
@@ -68,37 +69,41 @@ export const Wrapper: FunctionComponent<IWrapper> = ({ children }) => {
               Classes
             </Menu.Item>
             <Menu.Item
-              onClick={() => Router.push("/students")}
-              key="students"
-              icon={<FaUserGraduate />}
+              style={{
+                backgroundColor: "inherit",
+              }}
+              onClick={handleLogout}
+              icon={<FaPowerOff />}
             >
-              Students
+              Logout
             </Menu.Item>
-            <Menu.Item
-              onClick={() => Router.push("/tools")}
-              key="tools"
-              icon={<FaTools />}
-            >
-              Tools
-            </Menu.Item>
-            <SubMenu key="settings" title="Settings" icon={<FaCog />}>
-              <Menu.Item
-                onClick={() => Router.push("/settings/games")}
-                key="settings-games"
-                icon={<FaGamepad />}
-              >
-                Games
-              </Menu.Item>
-            </SubMenu>
           </Menu>
         </Sider>
         <Layout>
           <Header
             style={{ background: "white", borderBottom: `1px solid #e2e2e2` }}
           >
-            <div></div>
+            <Row justify="space-between" align="middle">
+              <Col>
+                <Breadcrumb separator=">">
+                  {breadCrumbs.map((breadCrumb) => {
+                    return (
+                      <Breadcrumb.Item href={breadCrumb.href}>
+                        <span style={{ textTransform: "capitalize" }}>
+                          {breadCrumb.label}
+                        </span>
+                      </Breadcrumb.Item>
+                    );
+                  })}
+                </Breadcrumb>
+              </Col>
+              <Col>
+                <FaUser />
+                {user.username}
+              </Col>
+            </Row>
           </Header>
-          <Content>{children}</Content>
+          <Content style={{ padding: 8 }}>{children}</Content>
         </Layout>
       </Layout>
     </>
